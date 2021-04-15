@@ -1,0 +1,192 @@
+USE sba;
+-- Question 1:
+
+SELECT
+	d.name as 'Department Name',
+	COUNT(c.id) AS 'Number of Courses'
+FROM department as d
+		JOIN
+	course AS c ON d.id = c.deptId
+GROUP BY d.id
+oRDER BY 2 ASC, 1 ASC;
+
+-- Question 2:
+SELECT
+	c.name AS 'Course Name',
+    COUNT(sc.studentId) AS 'Number of Students'
+FROM studentcourse AS sc
+		JOIN
+	course AS c ON sc.courseid = c.id
+GROUP BY sc.courseId
+ORDER BY 2 DESC, 1 ASC;
+
+-- Question 3:
+SELECT c.name AS 'Course Name'
+FROM course AS c
+		LEFT JOIN
+	facultycourse AS fc ON c.id = fc.courseid
+WHERE  fc.facultyid IS NULL
+ORDER BY 1 ASC;
+
+-- Question 4:
+SELECT 
+	c.name AS 'Course Name',
+    COUNT(sc.studentid) AS 'Number of Students'
+FROM studentcourse AS sc
+		INNER JOIN
+	course AS c ON sc.courseid = c.id
+		LEFT JOIN
+	facultycourse AS fc ON c.id = fc.courseid
+WHERE fc.facultyid IS NULL
+GROUP BY c.id
+ORDER BY 2 DESC, 1 ASC;
+
+-- Question 5:
+
+SELECT 
+    c.name AS 'Course Name',
+    COUNT(sc.studentId) AS 'Number of Students'
+FROM studentCourse AS sc
+        INNER JOIN 
+    course AS c ON sc.courseId = c.id
+        LEFT JOIN
+    facultyCourse AS fc ON c.id = fc.courseId
+WHERE fc.facultyId IS NULL
+GROUP BY c.id
+ORDER BY 2 DESC, 1 ASC;
+
+-- Question 6:
+
+SELECT 
+    COUNT(DISTINCT studentId) AS 'Total Number of Students',
+    YEAR(startDate) AS 'School Year'
+FROM studentCourse
+GROUP BY 2
+ORDER BY 2 ASC, 1 DESC;
+
+-- Question 7:
+
+SELECT 
+    startDate AS 'Start Date',
+    COUNT(DISTINCT studentId) AS 'Total Number of Students'
+FROM studentCourse
+WHERE MONTH(startDate) = '08'
+GROUP BY startDate
+ORDER BY 1 ASC, 2 ASC;
+
+-- Question 8:
+SELECT
+	s.firstname AS 'First Name', 
+    s.lastname AS 'Last Name', 
+    COUNT(d.id) AS 'Number of Courses'
+FROM 
+    department AS d
+		JOIN 
+	course AS c ON d.id = c.deptid
+		JOIN 
+	studentcourse AS sc on c.id = sc.courseid
+		JOIN
+	student AS s on sc.studentid = s.id
+WHERE c.deptid = s.majorid
+GROUP BY s.id
+ORDER BY 3 DESC, 1 ASC, 2 ASC;
+
+-- Question 9:
+SELECT 
+	s.firstname AS 'First Name', 
+    s.lastname AS 'Last Name', 
+    ROUND(AVG(progress), 1) AS 'Average Progress'
+FROM studentcourse as sc
+		JOIN
+	student AS s ON sc.studentid = s.id
+GROUP BY sc.studentid
+HAVING AVG(progress) < 50
+ORDER BY 3 DESC, 1 ASC, 2 ASC;
+
+-- Question 10:
+SELECT 
+    c.name AS 'Course Name',
+    ROUND(AVG(sc.progress), 1) AS 'Average Progress'
+FROM
+    course AS c
+		JOIN
+	studentcourse AS sc ON c.id = sc.courseId
+GROUP BY c.id
+ORDER BY 2 DESC, 1 ASC;
+
+-- Question 11:
+SELECT
+    c.name AS 'Course Name',
+    ROUND(AVG(sc.progress), 1) AS 'Average Progress'
+FROM
+    course AS c
+		JOIN
+	studentcourse AS sc ON c.id = sc.courseId
+GROUP BY c.id
+ORDER BY 2 DESC, 1 ASC
+LIMIT 1;
+
+-- QUESTION 12:
+SELECT
+	f.firstname AS 'First Name',
+    f.lastname AS 'Last Name',
+	ROUND(AVG(sc.progress), 1) AS 'Average Progress'
+FROM 
+	faculty AS f
+		JOIN
+	facultycourse AS fc ON f.id = fc.facultyid
+		JOIN
+    studentcourse AS sc ON fc.courseid = sc.courseid
+GROUP BY fc.facultyId
+ORDER BY 3 DESC, 1 ASC, 2 ASC;
+
+-- QUESTION 13:
+
+SELECT 
+    f.firstname AS 'First Name',
+    f.lastname AS 'Last Name',
+    ROUND(AVG(sc.progress), 1) AS 'Average Progress'
+FROM
+    faculty AS f
+        JOIN
+    facultycourse AS fc ON f.id = fc.facultyid
+        JOIN
+    studentcourse AS sc ON fc.courseid = sc.courseid
+GROUP BY fc.facultyid
+HAVING 
+	ROUND(AVG(sc.progress), 1) >= (
+		SELECT 
+			AVG(sc.progress) * 0.9
+		FROM
+			course AS c
+				JOIN
+			studentcourse AS sc ON c.id = sc.courseid
+		GROUP BY c.id
+        ORDER BY 1 DESC
+		LIMIT 1
+	);
+    
+-- Question 14
+
+SELECT 
+	s.firstname AS 'First Name',
+    s.lastname AS 'Last Name',
+    CASE 
+		WHEN MIN(progress) < 40 THEN 'F'
+        WHEN MIN(progress) < 50 THEN 'D'
+        WHEN MIN(progress) < 60 THEN 'C'
+        WHEN MIN(progress) < 70 THEN 'B'
+        WHEN MIN(progress) >= 70 THEN 'A'
+	END AS 'Minimum Grade',
+    CASE 
+		WHEN MAX(progress) < 40 THEN 'F'
+        WHEN MAX(progress) < 50 THEN 'D'
+        WHEN MAX(progress) < 60 THEN 'C'
+        WHEN MAX(progress) < 70 THEN 'B'
+        WHEN MAX(progress) >= 70 THEN 'A'
+	END AS 'Maximum Grade'
+FROM studentcourse AS sc
+		JOIN 
+	student AS s ON sc.studentId = s.id
+GROUP BY studentId
+ORDER BY 3 DESC, 4 DESC, 1 ASC, 2 ASC;
